@@ -11,7 +11,7 @@ import utils
 from model_search import Network
 
 parser = argparse.ArgumentParser(description = 'model searcher.')
-parser.add_argument('--batch_size', type=int, default=16, help='the batch size')
+parser.add_argument('--batch_size', type=int, default=1, help='the batch size')
 parser.add_argument('--lr', type=float, default=0.025, help='init learning rate')
 parser.add_argument('--arch_lr', type=float, default=3e-4, help='learning rate for arch encoding')
 parser.add_argument('--m_lr',type=float, default=0.0001, help='min learning rate')
@@ -28,7 +28,7 @@ parser.add_argument('--seed', type=int, default=2, help='random seed')
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
 parser.add_argument('--train_portion', type=float, default=0.8, help='portion of training data')
 parser.add_argument('--mode', type=int,default=3, help='the training mode')
-parser.add_argument('--data',type=str,default='./data',help='the data folder')
+parser.add_argument('--data',type=str,default='C:\\Users\\85202\\OneDrive - UTS\\Code\\PyTorch\\data', help='the data folder')
 parser.add_argument('--num_workers', type=int,default=6,help='the number worker.')
 args = parser.parse_args()
 
@@ -44,7 +44,7 @@ class Trainer:
     def __init__(self):
         def _create_dataset():
             train_transform, valid_transform = utils._data_transforms_cifar10(args)
-            train_data = dset.CIFAR10(root=args.data, train=True, download=True, transform=train_transform)
+            train_data = dset.CIFAR10(root=args.data, train=True, download=False, transform=train_transform)
             num_train = len(train_data)
             indices   = list(range(num_train))
             ratio = 1.0 if args.mode == 0 else args.train_portion
