@@ -9,6 +9,7 @@ import torch.nn as nn
 import torchvision.datasets as dset
 import utils
 from model_search import Network
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser(description = 'model searcher.')
 parser.add_argument('--batch_size', type=int, default=1, help='the batch size')
@@ -18,9 +19,9 @@ parser.add_argument('--m_lr',type=float, default=0.0001, help='min learning rate
 parser.add_argument('--momentum',type=float, default=0.9, help='momentum')
 parser.add_argument('--wd', type=float, default=3e-4, help='weight decay')
 parser.add_argument('--arch_wd', type=float, default=1e-3, help='alpha weight decay')
-parser.add_argument('--epochs', type=int, default=200, help='num of training epochs')
+parser.add_argument('--epochs', type=int, default=2, help='num of training epochs')
 parser.add_argument('--init_channels', type=int, default=16,help='num of init channels')
-parser.add_argument('--layers', type=int,default=8,help='total number of layers')
+parser.add_argument('--layers', type=int, default=2, help='total number of layers')
 parser.add_argument('--model_path', type=str,default='saved_models', help='path to save the model')
 parser.add_argument('--cutout', type=bool, default=False, help='use cutout')
 parser.add_argument('--cutout_length', type=int, default=16, help='cutout length')
@@ -29,7 +30,7 @@ parser.add_argument('--grad_clip', type=float, default=5, help='gradient clippin
 parser.add_argument('--train_portion', type=float, default=0.8, help='portion of training data')
 parser.add_argument('--mode', type=int,default=3, help='the training mode')
 parser.add_argument('--data',type=str,default='C:\\Users\\85202\\OneDrive - UTS\\Code\\PyTorch\\data', help='the data folder')
-parser.add_argument('--num_workers', type=int,default=6,help='the number worker.')
+parser.add_argument('--num_workers', type=int, default=4, help='the number worker.')
 args = parser.parse_args()
 
 '''
@@ -368,6 +369,7 @@ class Trainer:
             lr   = sche.get_lr()[0]
             print('eopch: {} lr: {}'.format(epoch, round(lr, 8)))
             
+            pbar = tqdm(total=len(self.loader_train))
             for step, (train_input, train_target) in enumerate(self.loader_train):
                 try:
                     (valid_input, valid_target) = loader_eval.next()
@@ -440,7 +442,9 @@ class Trainer:
                 train_top1.update(train_prec1, n)
                 train_top5.update(train_prec5, n)
                 print('train => [(epoch: {})(loss: {}), (prec1: {}), (prec5: {})]'.format(epoch, round(train_objs.avg, 6), round(train_top1.avg, 4), round(train_top5.avg, 4)))
+                pbar.update(1)
 
+            pbar.close()
             #evalute the model
             acc_tp1, acc_tp5, obj_avg = self.eval()
             if acc_tp1 > pre_best_acc:
